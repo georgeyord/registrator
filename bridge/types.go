@@ -30,6 +30,7 @@ type Config struct {
 type Service struct {
 	ID    string
 	Name  string
+	FrontendPort  string
 	Port  int
 	IP    string
 	Tags  []string

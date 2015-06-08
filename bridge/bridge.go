@@ -198,6 +198,10 @@ func (b *Bridge) newService(port ServicePort, isgroup bool) *Service {
 	}
 
 	metadata := serviceMetaData(container.Config.Env, port.ExposedPort)
+	disabled := mapDefault(metadata, "disabled", "")
+	if disabled != "" {
+		return nil
+	}
 
 	ignore := mapDefault(metadata, "ignore", "")
 	if ignore != "" {
@@ -217,6 +221,7 @@ func (b *Bridge) newService(port ServicePort, isgroup bool) *Service {
 		p, _ = strconv.Atoi(port.HostPort)
 	}
 	service.Port = p
+	service.FrontendPort = mapDefault(metadata, "frontend_port", strconv.Itoa(p))
 
 	if port.PortType == "udp" {
 		service.Tags = combineTags(

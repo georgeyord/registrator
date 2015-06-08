@@ -68,7 +68,7 @@ func (r *EtcdAdapter) Ping() error {
 }
 
 func (r *EtcdAdapter) Register(service *bridge.Service) error {
-	path := r.path + "/" + service.Name + "/" + service.ID
+	path := r.path + "/" + service.Name + "/" + service.FrontendPort + "/" + service.ID
 	port := strconv.Itoa(service.Port)
 	addr := net.JoinHostPort(service.IP, port)
 
@@ -86,7 +86,7 @@ func (r *EtcdAdapter) Register(service *bridge.Service) error {
 }
 
 func (r *EtcdAdapter) Deregister(service *bridge.Service) error {
-	path := r.path + "/" + service.Name + "/" + service.ID
+	path := r.path +  "/" + service.Name + "/" + service.FrontendPort + "/" + service.ID
 
 	var err error
 	if r.client != nil {
