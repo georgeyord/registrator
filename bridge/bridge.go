@@ -156,10 +156,10 @@ func (b *Bridge) add(containerId string, quiet bool) {
 			}
 			continue
 		}
-		service := b.newService(port, len(ports) > 1)
+		service := b.newService(port, len(ports) > 1, quiet)
 		if service == nil {
 			if !quiet {
-				log.Println("ignored:", container.ID[:12], "service on port", port.ExposedPort)
+				log.Println("not activated:", container.ID[:12], "service on port", port.ExposedPort)
 			}
 			continue
 		}
@@ -173,7 +173,7 @@ func (b *Bridge) add(containerId string, quiet bool) {
 	}
 }
 
-func (b *Bridge) newService(port ServicePort, isgroup bool) *Service {
+func (b *Bridge) newService(port ServicePort, isgroup bool, quiet bool) *Service {
 	container := port.container
 	defaultName := strings.Split(path.Base(container.Config.Image), ":")[0]
 	if isgroup {
@@ -198,13 +198,21 @@ func (b *Bridge) newService(port ServicePort, isgroup bool) *Service {
 	}
 
 	metadata := serviceMetaData(container.Config.Env, port.ExposedPort)
-	disabled := mapDefault(metadata, "disabled", "")
-	if disabled != "" {
+
+	frontendPort := mapDefault(metadata, "frontend_port", "")
+
+	if frontendPort == "" {
+		if !quiet {
+			log.Println("cancelled: " + hostname + "service on port " + port.ExposedPort + "(SERVICE_" + port.ExposedPort + "_FRONTEND_PORT missing)")
+		}
 		return nil
 	}
 
 	ignore := mapDefault(metadata, "ignore", "")
 	if ignore != "" {
+		if !quiet {
+			log.Println("ignored: " + hostname + "service on port " + port.ExposedPort)
+		}
 		return nil
 	}
 
@@ -221,7 +229,7 @@ func (b *Bridge) newService(port ServicePort, isgroup bool) *Service {
 		p, _ = strconv.Atoi(port.HostPort)
 	}
 	service.Port = p
-	service.FrontendPort = mapDefault(metadata, "frontend_port", strconv.Itoa(p))
+	service.FrontendPort = frontendPort
 
 	if port.PortType == "udp" {
 		service.Tags = combineTags(
