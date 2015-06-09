@@ -144,7 +144,7 @@ func (b *Bridge) add(containerId string, quiet bool) {
 		ports[string(port)] = servicePort(container, port, published)
 	}
 
-	if len(ports) == 0 && !quiet {
+	if b.config.Internal != true && len(ports) == 0 && !quiet {
 		log.Println("ignored:", container.ID[:12], "no published ports")
 		return
 	}
