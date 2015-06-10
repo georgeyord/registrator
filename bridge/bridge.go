@@ -145,14 +145,14 @@ func (b *Bridge) add(containerId string, quiet bool) {
 	}
 
 	if b.config.Internal != true && len(ports) == 0 && !quiet {
-		log.Println("ignored:", container.ID[:12], "no published ports")
+		log.Println("not activated:", container.ID[:12], "no published ports")
 		return
 	}
 
 	for _, port := range ports {
 		if b.config.Internal != true && port.HostPort == "" {
 			if !quiet {
-				log.Println("ignored:", container.ID[:12], "port", port.ExposedPort, "not published on host")
+				log.Println("not activated:", container.ID[:12], "port", port.ExposedPort, "not published on host")
 			}
 			continue
 		}
@@ -169,7 +169,7 @@ func (b *Bridge) add(containerId string, quiet bool) {
 			continue
 		}
 		b.services[container.ID] = append(b.services[container.ID], service)
-		log.Println("added:", container.ID[:12], service.ID)
+		log.Println("added:", container.ID[:12], service.Name, service.FrontendPort, service.ID)
 	}
 }
 
