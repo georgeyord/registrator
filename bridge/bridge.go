@@ -199,19 +199,19 @@ func (b *Bridge) newService(port ServicePort, isgroup bool, quiet bool) *Service
 
 	metadata := serviceMetaData(container.Config.Env, port.ExposedPort)
 
+	ignore := mapDefault(metadata, "ignore", "")
+	if ignore != "" {
+		if !quiet {
+			log.Println("ignored: " + hostname + "service on port " + port.ExposedPort)
+		}
+		return nil
+	}
+
 	frontendPort := mapDefault(metadata, "frontend_port", "")
 
 	if frontendPort == "" {
 		if !quiet {
 			log.Println("cancelled: " + hostname + "service on port " + port.ExposedPort + "(SERVICE_" + port.ExposedPort + "_FRONTEND_PORT missing)")
-		}
-		return nil
-	}
-
-	ignore := mapDefault(metadata, "ignore", "")
-	if ignore != "" {
-		if !quiet {
-			log.Println("ignored: " + hostname + "service on port " + port.ExposedPort)
 		}
 		return nil
 	}
